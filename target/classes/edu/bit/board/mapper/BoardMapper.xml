@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.bit.board.mapper.BoardMapper">		<!-- mapper 인터페이스가 있는 경로 = mapper를 implements 하고 있는 것 -->
+															<!-- 매우 주의 : namespace의 mapper.xml이 있는 위치 반드시 확인 + 폴더 만들 때 꼭 폴더 안에 폴더가 있는 형태여야 함!!!!!! -->
+																	<!-- CDATA 쓰는 방법 잊지 말자! -->
+	<select id="list" resultType="edu.bit.board.vo.BoardVO">		<!-- id는 mapper의 메소드 이름으로! / select일 때는 resultType으로 VO 경로있어야 함! -->
+	<![CDATA[														
+		select * from information order by iGroup desc, iStep asc
+	]]>
+	</select>
+	
+	<select id="conView" resultType="edu.bit.board.vo.BoardVO">
+	<![CDATA[
+		select iId, iHit, iName, iTitle, iContent from information where iId = #{iId}
+	]]>
+	</select>
+	
+   <insert id="write">			<!-- sql 주의 : 받은 내용은 3개지만, 새 글을 넣으려면 모든 데이터가 필요함. 받은 내용만 values에 넣어주고 나머지는 기본 세팅하면 됨. / values에 들어온 값을 줄때는 iName= 는 필요 x / 두 군데 모두 () 있어야 함. 꼭!!! -->
+   <![CDATA[
+   		insert into information (iId, iName, iTitle, iContent, iHit, iGroup, iStep, iIndent) values (information_seq.nextval, #{iName}, #{iTitle}, #{iContent}, 0, information_seq.currval, 0, 0)
+   ]]>
+   </insert>
+   
+   <update id="modify">			<!-- sql 주의 : 받은 내용은 3개지만, 새 글을 넣으려면 모든 데이터가 필요함. 받은 내용만 values에 넣어주고 나머지는 기본 세팅하면 됨. / values에 들어온 값을 줄때는 iName= 는 필요 x / 두 군데 모두 () 있어야 함. 꼭!!! -->
+   <![CDATA[
+   		update information set iName=#{iName}, iTitle=#{iTitle}, iContent=#{iContent} where iId = #{iId}
+   ]]>
+   </update>
+   
+   <delete id="delete">			
+   <![CDATA[
+   		delete from information where iId=#{iId} 
+   ]]>
+   </delete>
+   
+   	<select id="replyView" resultType="edu.bit.board.vo.BoardVO">
+	<![CDATA[
+		select * from information where iId = #{iId}
+	]]>
+	</select>
+	
+   <insert id="reply">			<!-- 주의 : iGroup은 원글에 대한 답변을 의미하므로 꼭 가져와야 함 / hit는 -->
+   <![CDATA[
+   		insert into information (iId, iName, iTitle, iContent, iGroup, iStep, iIndent) values (information_seq.nextval, #{iName}, #{iTitle}, #{iContent}, #{iGroup}, #{iStep}+1, #{iIndent}+1)
+   ]]>
+   </insert>
+   
+    <update id="replyShape">		<!-- 매우 주의 : iStep은 기존 것에 +1하는 것이므로, 객체로 받은 것을 +1하면 안됨 -->
+   <![CDATA[
+   		update information set iStep=iStep+1 where iGroup=#{iGroup} and iStep > #{iStep}
+   ]]>
+   </update>  
+   
+    <update id="hit">		<!-- 매우 주의 : iStep은 기존 것에 +1하는 것이므로, 객체로 받은 것을 +1하면 안됨 / set 키워드 까먹지 말자!!!! -->
+   <![CDATA[
+   		update information set iHit = iHit + 1 where iId = #{iId}
+   ]]>
+   </update>  
+   
+   
+  	
+</mapper>
